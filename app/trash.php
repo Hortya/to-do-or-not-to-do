@@ -3,11 +3,9 @@ session_start();
 include "./functions.php";
 token();
 
-
-
 $dbCo = dbcolink();
 
-$query = $dbCo->prepare("SELECT Id_task, title FROM task WHERE is_to_do = 1 ORDER BY creation_date ASC;");
+$query = $dbCo->prepare("SELECT Id_task, title FROM task WHERE is_to_do = 0 ORDER BY creation_date ASC;");
 $query->execute();
 $result = $query->fetchAll();
 ?>
@@ -35,25 +33,25 @@ $result = $query->fetchAll();
                 echo '<p class="error">Erreur : ' . implode($_SESSION['error']) . '</p>';
                 unset($_SESSION['error']);
             }
-            else echo '<h2 class="second-ttl">To Do</h2>';
-
+            else echo '<h2 class="second-ttl">Done</h2>';
         ?>
     </header>
     <main>
         <ul class="list">
             <?php
-            echo getTaskList($result)
+            echo getTaskList($result, true)
             ?>
         </ul>
     </main>
     <footer>
-        <a href="trash.php" class='btn'>
-            <img class="btn--trash" src="img/trash-circle-svgrepo-com.svg" alt="voir les tâches déjà faite">
+        <a href="index.php" class='btn'>
+            <img class="btn--trash" src="img/undo-svgrepo-com.svg" alt="retourner voir les tâches à faire">
         </a>
         <a href="task.php?do=create" class='btn'>
             <img class="btn--add" src="img/create-svgrepo-com.svg" alt="ajouter une tâche">
         </a>
     </footer>
+    <script src="js/script.js"></script>
 </body>
 
 </html>

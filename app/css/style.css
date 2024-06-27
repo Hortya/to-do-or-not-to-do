@@ -1,0 +1,116 @@
+:root{
+    font-size: 16px;
+
+}
+
+ul, li{
+    padding: 0;
+}
+
+body{
+    background-color: #4F1271;
+}
+
+footer{
+    display: flex;
+}
+
+.main-ttl, .second-ttl{
+    text-align: center;
+    color: #FFF;
+}
+
+.main-ttl{
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.second-ttl{
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.list{
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap : 1rem;
+    height: 70vh;
+    width: 75vw;
+    overflow-y: scroll;
+}
+
+.list__task{
+    height: 20%;
+    width: 100%;
+    border-radius: 3%;
+    display: flex;
+    background-color: #BFACC8;
+}
+
+.task{
+    font-size: 1.5rem;
+    display: inline-block;
+    width: 75%;
+}
+
+.btn{
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.btn, .btn--add, .btn--done, .btn--trash, .btn--undo{
+    height: 3rem;
+    width: 3rem;
+}
+
+.btn--modifie, .btn--itsdone{
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+.btn--add, .btn--done{
+    margin-left: 60vw;
+}
+
+
+.btn--close{
+    margin-right: 75vw;
+    height: 4rem;
+    width: 4rem;
+}
+
+.add-task-container{
+    margin: 0 auto;
+    width: 75vw;
+    height: 60vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.add-task-container__input-ctn{
+    display: flex;
+    flex-direction: column;
+}
+
+.input-ttl{
+    height: 50%;
+    text-align: start;
+    font-size: 1rem;
+}
+
+.input-ttl-label{
+    color: #FFF;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.error{
+    font-style: italic;
+}
+
+.success, .error{
+    color: #FFF;
+    text-decoration: underline;
+    text-align: center;
+}
