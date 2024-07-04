@@ -52,6 +52,11 @@ footer{
     font-size: 1.5rem;
     display: inline-block;
     width: 75%;
+    text-align: center;
+}
+
+.task__order{
+    font-size: 2rem;
 }
 
 .btn{
@@ -59,7 +64,7 @@ footer{
     border-color: transparent;
 }
 
-.btn, .btn--add, .btn--done, .btn--trash, .btn--undo{
+.btn, .btn--add, .btn--done, .btn--trash, .btn--undo, .btn--up, .btn--down{
     height: 3rem;
     width: 3rem;
 }

@@ -7,15 +7,41 @@ function getArrayAsHTMLp (array $array, string $pstyle = ''): string
 };
 
 
-
+/**
+ * Create a html task list depending on the location (index or trash)
+ *
+ * @param array $array the database array
+ * @param boolean $trash if trash set true / if index set false
+ * @return string the html task list
+ */
 function getTaskList (array $array, bool $trash = false): string
 {
     if(!$trash){
     $li = [];
     foreach($array as $value){
-        $li[] = '<li class="list__task"><p class = "task">' . $value['title'] . '</p>'
+        $li[] = '<li class="list__task">
+        <form action="action.php" method="post">
+            <input type="hidden" name="token" value="' . $_SESSION['token'] . '">
+            <input type="hidden" name="i" value="' . $value['Id_task'] . '">
+            <input type="hidden" name="order" value="' . $value['order_'] - 1 . '">
+            <input type="hidden" name="do" value="up">
+            <button class="btn">
+            <img class="btn--up" src="img/up.svg" alt="augmenter la priorité de la tâche">
+            </button>
+        </form>
+        <p class="task__order">' . $value['order_'] . '</p>
+        <form action="action.php" method="post">
+            <input type="hidden" name="token" value="' . $_SESSION['token'] . '">
+            <input type="hidden" name="i" value="' . $value['Id_task'] . '">
+            <input type="hidden" name="order" value="' . $value['order_'] + 1 . '">
+            <input type="hidden" name="do" value="down">
+            <button class="btn">
+                <img class="btn--down" src="img/down.svg" alt="diminuer la priorité de la tâche">
+            </button>
+        </form>
+        <p class = "task">' . $value['title'] . '</p>'
         . '<a href="task.php?do=modifie&i=' . $value['Id_task'] . '" class="btn"><img class="btn--modifie" src="/img/pen-svgrepo-com.svg" alt="modifier la tâche"></a>
-        <a href="action.php?do=done&i=' . $value['Id_task'] . '&token=' . $_SESSION['token'] . '" class="btn"><img class="btn--itsdone" src="/img/done-svgrepo-com.svg" alt="valider la tâche"></a></li>';
+        <a href="action.php?do=done&i=' . $value['Id_task'] . '&token=' . $_SESSION['token'] . '&order=' . $value['order_'] . '" class="btn"><img class="btn--itsdone" src="/img/done-svgrepo-com.svg" alt="valider la tâche"></a></li>';
     };
     return implode($li);}
     else{
@@ -29,12 +55,16 @@ function getTaskList (array $array, bool $trash = false): string
 
 }
 
-
-function dbcolink ()
+/**
+ * Create and return the database connection
+ *
+ * @return object the database connection
+ */
+function dbcolink (): object
 {
     try {
         $dbCo = new PDO(
-            'mysql:host=172.21.0.2;dbname=to_do;charset=utf8',
+            'mysql:host=db;dbname=to_do;charset=utf8',
             'user',
             'password'
         );
@@ -99,4 +129,17 @@ function redirectTo(string $url = 'index.php'): void
     // var_dump('REDIRECT ' . $url);
     header('Location: ' . $url);
     exit;
+}
+
+/**
+ * Obtain the max order from database
+ *
+ * @param object $db The database connection
+ * @return int | NULL The max order value (or NULL if there is not order value)
+ */
+function haveMax(object $db): int | NULL
+{
+    $query = $db->prepare('SELECT MAX(order_) FROM task');
+    $query->execute();
+    return $query->fetchColumn();
 }

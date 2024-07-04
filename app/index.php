@@ -7,7 +7,7 @@ token();
 
 $dbCo = dbcolink();
 
-$query = $dbCo->prepare("SELECT Id_task, title FROM task WHERE is_to_do = 1 ORDER BY creation_date ASC;");
+$query = $dbCo->prepare("SELECT Id_task, title, order_ FROM task WHERE is_to_do = 1 ORDER BY order_ ASC;");
 $query->execute();
 $result = $query->fetchAll();
 ?>
