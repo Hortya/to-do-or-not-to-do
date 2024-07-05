@@ -1,9 +1,9 @@
 <?php
 session_start();
 include "./functions.php";
+include "./includes/_database.php";
 token();
 
-$dbCo = dbcolink();
 
 $query = $dbCo->prepare("SELECT Id_task, title FROM task WHERE is_to_do = 0 ORDER BY creation_date ASC;");
 $query->execute();

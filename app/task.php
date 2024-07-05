@@ -1,9 +1,10 @@
 <?php
 session_start();
 include "./functions.php";
+include "./includes/_database.php";
 token();
 
-$dbCo = dbcolink();
+
 
 if(!isset($_GET['do'])){
     header('Location: index.php');

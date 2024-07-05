@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "./functions.php";
-$dbCo = dbcolink();
+include "./includes/_database.php";
 
 if (!isset($_REQUEST['do'])) {
     redirectTo('index.php');

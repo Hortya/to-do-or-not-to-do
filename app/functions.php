@@ -62,20 +62,7 @@ function getTaskList (array $array, bool $trash = false): string
  */
 function dbcolink (): object
 {
-    try {
-        $dbCo = new PDO(
-            'mysql:host=db;dbname=to_do;charset=utf8',
-            'user',
-            'password'
-        );
-        $dbCo->setAttribute(
-            PDO::ATTR_DEFAULT_FETCH_MODE,
-            PDO::FETCH_ASSOC
-        );
-    } catch (Exception $e) {
-        die('Unable to connect to the database.
-        ' . $e->getMessage());
-    }
+
     return $dbCo;
 }
 

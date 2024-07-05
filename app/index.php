@@ -1,11 +1,9 @@
 <?php
 session_start();
 include "./functions.php";
+include "./includes/_database.php";
 token();
 
-
-
-$dbCo = dbcolink();
 
 $query = $dbCo->prepare("SELECT Id_task, title, order_ FROM task WHERE is_to_do = 1 ORDER BY order_ ASC;");
 $query->execute();
