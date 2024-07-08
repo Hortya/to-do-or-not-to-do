@@ -19,10 +19,13 @@ elseif ($_GET['do'] === 'modifie'){
     $isqueryOK = $query->execute(['id' => ROUND($_GET['i'])]);
     $result = $query->fetch();
     if(!$result){
-        header('Location: http://localhost:8080/index.php');
+        header('Location: index.php');
         exit;
     }
 }
+$queryTheme = $dbCo->prepare("SELECT name, id_theme FROM theme");
+    $isqueryOK = $queryTheme->execute();
+    $resultTheme = $queryTheme->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -56,12 +59,27 @@ elseif ($_GET['do'] === 'modifie'){
                 echo 'value ="' . $result['title'] . '"';
             }
             ?>
-            >            
+            >
             <?php
             if(isset($_GET['error'])) echo '<p>ERREUR : ' . $_GET['error'];
             ?>
+            <fieldset>
+                <legend>Sélectionnez vos thèmes</legend>
+                <?php
+                if(is_array($resultTheme)){
+                    foreach($resultTheme as $theme){
+                        echo '<div class="input-checkbox">
+                        <input type="checkbox" id="' . $theme['id_theme']  . '" name="' . $theme['name'] . '" value="' . $theme['id_theme'] . '">
+                        <label class="input-ttl-label" for="' . $theme['id_theme'] . '">' . $theme['name'] . '</label>
+                        </div>';
+                    }
+                }
+                ?>
+                <a href="theme.php" class="btn js-theme">Créer un thème</a>
+            </fieldset>
+            
             <button class='btn'>
-                <img class="btn--done" src="img/done-svgrepo-com.svg" alt="<?= $h2;?>la tâche ">
+                <img class="btn--done" src="img/done-svgrepo-com.svg" alt="<?= $h2;?> la tâche ">
             </button>
         </form>
     </main>
