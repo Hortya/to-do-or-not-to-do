@@ -40,6 +40,7 @@ function getTaskList (array $array, bool $trash = false): string
             </button>
         </form>
         <p class = "task">' . $value['title'] . '</p>'
+        . '<p class = date>' . displayNotNull($value['deadline'])  . '</p>'
         . '<a href="task.php?do=modifie&i=' . $value['Id_task'] . '" class="btn"><img class="btn--modifie" src="/img/pen-svgrepo-com.svg" alt="modifier la tâche"></a>
         <a href="action.php?do=done&i=' . $value['Id_task'] . '&token=' . $_SESSION['token'] . '&order=' . $value['order_'] . '" class="btn"><img class="btn--itsdone" src="/img/done-svgrepo-com.svg" alt="valider la tâche"></a></li>';
     };
@@ -48,22 +49,20 @@ function getTaskList (array $array, bool $trash = false): string
     $li = [];
     foreach($array as $value){
         $li[] = '<li class="list__task"><p class = "task">' . $value['title'] . '</p>'
-        . '<a href="action.php?do=delete&i=' . $value['Id_task'] . '&token=' . $_SESSION['token'] . '" class="btn js-del"><img class="btn--trash" src="/img/trash-circle-svgrepo-com.svg"></a>
+        . '<button type="button" data-id-delete="' . $value['Id_task'] . '" class="btn js-del"><img class="btn--trash" src="/img/trash-circle-svgrepo-com.svg"></a>
         <a href="action.php?do=undo&i=' . $value['Id_task'] . '&token=' . $_SESSION['token'] . '" class="btn"><img class="btn--undo" src="/img/undo-svgrepo-com.svg" alt=""></a></li>';
     };
     return implode($li);}
 
 }
 
-/**
- * Create and return the database connection
- *
- * @return object the database connection
- */
-function dbcolink (): object
-{
 
-    return $dbCo;
+
+function displayNotNull(string | null $value): string{
+    if(is_null($value)){
+        return '';
+    }
+    else return $value;
 }
 
 /**

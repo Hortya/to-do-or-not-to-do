@@ -47,7 +47,7 @@ elseif ($_GET['do'] === 'modifie'){
         <form action="action.php" method="post" class="add-task-container">
             <input type="hidden" name="token" value="<?= $_SESSION['token'] ?>">
             <input type="hidden" name="do" value="<?= $_GET['do'] ?>">
-            <?php if($_GET['do'] === 'modifie') echo '<input type="hidden" name="id" value="' . $result['Id_task'] . '">';
+            <?php if($_GET['do'] === 'modifie') echo '<input type="hidden" name="i" value="' . $result['Id_task'] . '">';
             ?>
             <label class="input-ttl-label" for="tittle">Titre</label>
             <input class="input-ttl" type="text" id="tittle" name="task_tittle" required placeholder="voter NFP"
@@ -56,7 +56,8 @@ elseif ($_GET['do'] === 'modifie'){
                 echo 'value ="' . $result['title'] . '"';
             }
             ?>
-            >            
+            >
+            <input type="date" name="date" class="input-date">
             <?php
             if(isset($_GET['error'])) echo '<p>ERREUR : ' . $_GET['error'];
             ?>
