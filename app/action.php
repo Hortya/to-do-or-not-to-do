@@ -2,6 +2,7 @@
 session_start();
 include "./functions.php";
 include "./includes/_database.php";
+include "./includes/_config.php";
 
 if (!isset($_REQUEST['do'])) {
     redirectTo('index.php');
@@ -50,15 +51,24 @@ elseif ($_REQUEST['do'] === 'undo') {
     ];
     $isupdateOK = $update->execute($bindvalues);
     $newTask = $dbCo->lastInsertId();
-    $_SESSION['success'] = 'Votre tâche a bien été mise dans "To do".';
+    $_SESSION['success'] = $success['toDo'];
     redirectTo();
 }
-
-// When the user want to rise the task priority
-elseif ($_REQUEST['do'] === 'up') {
-    if ($_REQUEST['order'] == 0) {
-        $errorList[] = 'Votre tâche est déjà la première.';
-    }
+elseif ($_REQUEST['do'] === 'delete') {
+    $query = $dbCo->prepare('SELECT order_ FROM `task` WHERE `task`.`Id_task` = :id;');
+    $isqueryOK = $query->execute(['id' => intval($_REQUEST['i'])]);
+    $order = $query->fetch();
+    $delete = $dbCo->prepare('
+        DELETE FROM `task` WHERE `task`.`Id_task` = :id;
+        UPDATE `task` SET order_ = _order -1 WHERE order_ > ' . $delete . ';');
+    $isinsertOK = $delete->execute(['id' => intval($_REQUEST['i'])]);
+    $newTask = $dbCo->lastInsertId();
+    $_SESSION['success'] = $success['delete'];
+    redirectTo('trash.php');
+}
+elseif ($_REQUEST['do'] === 'up'){
+    if($_REQUEST['order'] == 0){
+        $errorList[] = $errors['first'];}
     else {
         try{
         $dbCo->beginTransaction();
@@ -81,6 +91,8 @@ elseif ($_REQUEST['do'] === 'up') {
             $dbCo->rollBack();
             $errorList[] = 'update KO';
         }
+        $isupdateOK = $update->execute(['id' => intval($_REQUEST['i']), 'order' => intval($_REQUEST['order'])]);
+        $_SESSION['success'] = $success['upPriority'];
         redirectTo();
     }
 }
@@ -114,50 +126,36 @@ elseif ($_REQUEST['do'] === 'down') {
         redirectTo();
     }
 }
-
-
-if (!empty($errorList)) {
-    $_SESSION['error'] = $errorList;
-    redirectTo($_SERVER['HTTP_REFERER']);
-}
-
-
-
-$errorList = [];
-if (!isset($_POST['task_tittle'])) {
-    $errorList[] = 'Veuillez saissir le texte de votre tâche.';
-}
-if (strlen($_POST['task_tittle']) < 2) {
-    $errorList[] = 'Veuillez saissir un texte de plus de 1 caractère pour votre tâche.';
-}
-if (strlen($_POST['task_tittle']) > 150) {
-    $errorList[] = 'Veuillez saissir un texte de moins de 150 caractère pour votre tâche.';
-}
-
-if (!empty($errorList)) {
-    $_SESSION['error'] = $errorList;
-    redirectTo($_SERVER['HTTP_REFERER']);
-}
-
-// When the user want to modifie a task
-if ($_POST['do'] === 'modifie') {
-    $update = $dbCo->prepare('UPDATE `task` SET `title` = :ttl WHERE `task`.`Id_task` = :id;');
-    $isupdateOK = $update->execute(['ttl' => htmlspecialchars($_POST['task_tittle']),
-        'id' => intval($_REQUEST['i']) ]);
-    $newTask = $dbCo->lastInsertId();
-    $_SESSION['success'] = 'Votre tâche a bien été modifiée.';
-    redirectTo();
-}
-// When the user want to create a task
-elseif ($_POST['do'] === 'create') {
-    $max = haveMax($dbCo);
-    $insert = $dbCo->prepare('INSERT INTO `task` (`title`, `creation_date`, `order_`, `deadline`) VALUES (:ttl, NOW(), :max, :deadline);');
-    $isinsertOK = $insert->execute([
-        'ttl' => htmlspecialchars($_POST['task_tittle']),
-        'max' => $max + 1,
-        'deadline' => $_POST['deadline']
-    ]);
-    $newTask = $dbCo->lastInsertId();
-    $_SESSION['success'] = 'Votre tâche a bien été crée.';
-    redirectTo();
+elseif ($_POST['do'] === 'modifie') {
+    $errorList = userInputError($_POST['task_tittle'], 2, 150);
+    if($errorList.length < 1 ){
+        $update = $dbCo->prepare('UPDATE `task` SET `title` = :ttl WHERE `task`.`Id_task` = ' . $_POST['id'] . '; ');
+        $isupdateOK = $update->execute(['ttl' => htmlspecialchars($_POST['task_tittle'])]);
+        $newTask = $dbCo->lastInsertId();
+        $_SESSION['success'] = $success['modifie'];
+        redirectTo();
+    }
+} elseif ($_POST['do'] === 'create') {
+    $errorList = userInputError($_POST['task_tittle'], 2, 150);
+    if($errorList.length < 1 ){
+        $max = haveMax($dbCo);
+        $insert = $dbCo->prepare('INSERT INTO `task` (`title`, `creation_date`, `order_`) VALUES (:ttl, NOW(), ' . $max + 1 . ');');
+        $isinsertOK = $insert->execute(['ttl' => htmlspecialchars($_POST['task_tittle'])]);
+        $newTask = $dbCo->lastInsertId();
+        $_SESSION['success'] = $success['create'];
+        redirectTo();}
+    }
+elseif ($_REQUEST['do'] === 'theme'){
+    $errorList = userInputError($_POST['name'], 2, 150);
+    if($errorList.length < 1 ){
+        if(!isHexColor($_POST['themecolor'])){
+            $errorList[] = $errors['color'];
+        }
+        else {
+            $insert = $dbCo->prepare('INSERT INTO `theme` (`name`, `color`) VALUES (:name, :color);');
+            $isinsertOK = $insert->execute([
+                'name' => htmlspecialchars($_POST['themename']),
+                'color' => $_POST['themecolor']]);
+                redirectTo();
+            }}
 }

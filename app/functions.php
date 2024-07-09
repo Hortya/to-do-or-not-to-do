@@ -129,3 +129,27 @@ function haveMax(object $db): int | NULL
     $query->execute();
     return $query->fetchColumn();
 }
+
+
+function isHexColor(string $color): bool
+{
+    $color = ltrim($color,'#');
+    return ctype_xdigit($color) && (strlen($color) == 6 || strlen($color) == 3);
+}
+
+
+
+function userInputError(string $name, int $min, int $max): array
+{
+    $errorList = [];
+    if (!isset($name)) {
+        $errorList[] = $errors['empty'];
+    }
+    if (strlen($name) < $min) {
+        $errorList[] = $errors['longer'];
+    }
+    if (strlen($name) > $max) {
+        $errorList[] = $errors['smaller'];
+    }
+    return $errorList;
+}
