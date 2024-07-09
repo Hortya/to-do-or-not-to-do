@@ -5,7 +5,7 @@ include "./includes/_database.php";
 token();
 
 
-$query = $dbCo->prepare("SELECT Id_task, title, order_ FROM task WHERE is_to_do = 1 ORDER BY order_ ASC;");
+$query = $dbCo->prepare("SELECT Id_task, title, order_, deadline FROM task WHERE is_to_do = 1 ORDER BY order_ ASC;");
 $query->execute();
 $result = $query->fetchAll();
 ?>
@@ -52,6 +52,7 @@ $result = $query->fetchAll();
             <img class="btn--add" src="img/create-svgrepo-com.svg" alt="ajouter une tâche">
         </a>
     </footer>
+    <script src="js/script.js"></script>
 </body>
 
 </html>

@@ -10,27 +10,45 @@ if (!isset($_REQUEST['do'])) {
 
 preventCSRF();
 
-
+//When the task is done
 if ($_REQUEST['do'] === 'done') {
-    $update = $dbCo->prepare('
-        UPDATE `task` SET `is_to_do` = 0, order_ = NULL WHERE `task`.`Id_task` = :id;
-        UPDATE `task` SET order_ = order_ -1 WHERE order_ > :order');
-    $bindvalues = [
-        'id' => intval($_REQUEST['i']),
-        'order'=> intval($_REQUEST['order'])
+    try {
+        $dbCo->beginTransaction();
+        $update = $dbCo->prepare('
+            UPDATE `task` SET `is_to_do` = 0, order_ = NULL WHERE `task`.`Id_task` = :id;');
+        $bindvalues = [
+            'id' => intval($_REQUEST['i'])
         ];
-    $isupdateOK = $update->execute($bindvalues);
-    $newTask = $dbCo->lastInsertId();
-    $_SESSION['success'] = $success['done'];
+        $isUpdateOk = $update->execute($bindvalues);
+        $update = $dbCo->prepare('
+            UPDATE `task` SET order_ = order_ -1 WHERE order_ > :order');
+        $bindvalues = [
+            'order' => intval($_REQUEST['order'])
+        ];
+        $isUpdateOk = $update->execute($bindvalues);
+        $dbCo->commit();
+        if ($isUpdateOk) {
+            $_SESSION['success'] = 'Votre tâche a bien été mise dans "done". Bravo !';
+        } else {
+            $errorList[] = 'update KO';
+        }
+    } catch (Exception $e) {
+        $dbCo->rollBack();
+        $errorList[] = 'update KO';
+    }
     redirectTo();
 }
+// When the user want to reuse a task
 elseif ($_REQUEST['do'] === 'undo') {
     $max = haveMax($dbCo);
-    if(is_null($max)){
+    if (is_null($max)) {
         $max = 0;
     }
-    $update = $dbCo->prepare("UPDATE `task` SET `is_to_do` = 1, order_ = $max + 1 WHERE `task`.`Id_task` = :id;");
-    $bindvalues = ['id' => intval($_REQUEST['i'])];
+    $update = $dbCo->prepare("UPDATE `task` SET `is_to_do` = 1, order_ = :max WHERE `task`.`Id_task` = :id;");
+    $bindvalues = [
+        'id' => intval($_REQUEST['i']),
+        'max' => $max + 1
+    ];
     $isupdateOK = $update->execute($bindvalues);
     $newTask = $dbCo->lastInsertId();
     $_SESSION['success'] = $success['toDo'];
@@ -50,34 +68,63 @@ elseif ($_REQUEST['do'] === 'delete') {
 }
 elseif ($_REQUEST['do'] === 'up'){
     if($_REQUEST['order'] == 0){
-        $errorList[] = $errors['first'];
-    }
-    else{   
+        $errorList[] = $errors['first'];}
+    else {
+        try{
+        $dbCo->beginTransaction();
         $update = $dbCo->prepare('
         UPDATE `task` SET `order_` = order_ + 1 WHERE task.order_ = :order;
+        ');
+        $isUpdateOk = $update->execute(['order' => intval($_REQUEST['order'])]);
+        $update = $dbCo->prepare('
         UPDATE `task` SET `order_` = order_ - 1 WHERE `task`.`Id_task` = :id;
         ');
+        $isUpdateOk = $update->execute(['id' => intval($_REQUEST['i'])]);
+        $dbCo->commit();
+        if ($isUpdateOk) {
+            $_SESSION['success'] = 'Votre tâche a bien augmenté en priorité.';
+        } else {
+            $errorList[] = 'update KO';
+        }
+        }
+        catch (Exception $e) {
+            $dbCo->rollBack();
+            $errorList[] = 'update KO';
+        }
         $isupdateOK = $update->execute(['id' => intval($_REQUEST['i']), 'order' => intval($_REQUEST['order'])]);
         $_SESSION['success'] = $success['upPriority'];
         redirectTo();
     }
 }
-elseif ($_REQUEST['do'] === 'down'){
+// When the user want to lower the task priority
+elseif ($_REQUEST['do'] === 'down') {
     $max = haveMax($dbCo);
-    if($_REQUEST['order'] > $max){
-        $errorList[] = $errors['last'];
-    }
-    else{
-        $update = $dbCo->prepare('
-            UPDATE `task` SET `order_` = order_ - 1 WHERE task.order_ = :order;
-            UPDATE `task` SET `order_` = order_ + 1 WHERE `task`.`Id_task` = :id;
-            ');
-        $isupdateOK = $update->execute(['id' => intval($_REQUEST['i']), 'order' => intval($_REQUEST['order'])]);
-        $newTask = $dbCo->lastInsertId();
-        $_SESSION['success'] = $success['downPriority'];
+    if ($_REQUEST['order'] > $max) {
+        $errorList[] = 'Votre tâche est déjà la dernière.';
+    } else {
+        try{
+            $dbCo->beginTransaction();
+            $update = $dbCo->prepare('
+                UPDATE `task` SET `order_` = order_ - 1 WHERE task.order_ = :order;
+                ');
+                $isUpdateOk = $update->execute(['order' => intval($_REQUEST['order'])]);
+            $update = $dbCo->prepare('
+                UPDATE `task` SET `order_` = order_ + 1 WHERE `task`.`Id_task` = :id;
+                ');
+                $isUpdateOk = $update->execute(['id' => intval($_REQUEST['i'])]);
+            $dbCo->commit();
+        if ($isUpdateOk) {
+            $_SESSION['success'] = 'Votre tâche a bien diminuer en priorité.';
+        } else {
+            $errorList[] = 'update KO';
+        }
+        }
+        catch (Exception $e) {
+            $dbCo->rollBack();
+            $errorList[] = 'update KO';
+        }
         redirectTo();
     }
-
 }
 elseif ($_POST['do'] === 'modifie') {
     $errorList = userInputError($_POST['task_tittle'], 2, 150);
@@ -111,9 +158,4 @@ elseif ($_REQUEST['do'] === 'theme'){
                 'color' => $_POST['themecolor']]);
                 redirectTo();
             }}
-}
-
-if (!empty($errorList)) {
-    $_SESSION['error'] = $errorList;
-    redirectTo($_SERVER['HTTP_REFERER']);
 }

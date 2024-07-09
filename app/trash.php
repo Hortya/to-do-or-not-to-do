@@ -51,6 +51,7 @@ $result = $query->fetchAll();
             <img class="btn--add" src="img/create-svgrepo-com.svg" alt="ajouter une tâche">
         </a>
     </footer>
+    <input type="hidden" name="token" id="token" value="<?= $_SESSION['token']?>">
     <script src="js/script.js"></script>
 </body>
 
